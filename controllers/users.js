@@ -34,7 +34,7 @@ const getUser = (req, res) => {
       const error = new Error('Пользователь с указанным id не найден');
       error.name = 'DocumentNotFoundError';
       throw error;
-    })
+    }).select('-__v')
     .then((user) => {
       if (user) { res.status(200).send(user); } else {
         res.status(404).send('Пользователь с указанным id не найден');
