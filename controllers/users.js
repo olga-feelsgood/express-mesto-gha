@@ -5,14 +5,14 @@ const createUser = (req, res) => {
   User.create({ name, about, avatar })
     .then((newUser) => {
       if (newUser) { res.status(200).send(newUser); } else {
-        res.status(400).send('Переданы некорректные данные при создании пользователя');
+        res.status(400).send({ message: 'Переданы некорректные данные при создании пользователя' });
       }
     })
     .catch((error) => {
       if (error.name === 'ValidationError') {
-        res.status(400).send('Переданы некорректные данные при создании пользователя');
+        res.status(400).send({ message: 'Переданы некорректные данные при создании пользователя' });
       } else {
-        res.status(500).send('Ошибка на сервере');
+        res.status(500).send({ message: 'Ошибка на сервере' });
       }
     });
 };
@@ -23,7 +23,7 @@ const getAllUsers = (req, res) => {
       res.send(data);
     })
     .catch(() => {
-      res.status(500).send('Ошибка на сервере');
+      res.status(500).send({ message: 'Ошибка на сервере' });
     });
 };
 
@@ -34,22 +34,22 @@ const getUser = (req, res) => {
       const error = new Error('Пользователь с указанным id не найден');
       error.name = 'DocumentNotFoundError';
       throw error;
-    }).select('-__v')
+    })
     .then((user) => {
       if (user) { res.status(200).send(user); } else {
-        res.status(404).send('Пользователь с указанным id не найден');
+        res.status(404).send({ message: 'Пользователь с указанным id не найден' });
       }
     })
     .catch((error) => {
       if (error.name === 'DocumentNotFoundError') {
-        res.status(404).send('Пользователь с указанным id не найден');
+        res.status(404).send({ message: 'Пользователь с указанным id не найден' });
         return;
       }
       if (error.name === 'CastError') {
-        res.status(400).send('Неверный формат id пользователя');
+        res.status(400).send({ message: 'Неверный формат id пользователя' });
         return;
       }
-      res.status(500).send('Ошибка на сервере');
+      res.status(500).send({ message: 'Ошибка на сервере' });
     });
 };
 
@@ -64,23 +64,23 @@ const updateUser = (req, res) => {
       if (user) {
         res.send(user);
       } else {
-        res.status(404).send('Пользователь с указанным id не найден');
+        res.status(404).send({ message: 'Пользователь с указанным id не найден' });
       }
     })
     .catch((error) => {
       if (error.name === 'DocumentNotFoundError') {
-        res.status(404).send('Пользователь с указанным id не найден');
+        res.status(404).send({ message: 'Пользователь с указанным id не найден' });
         return;
       }
       if (error.name === 'ValidationError') {
-        res.status(400).send('Переданы некорректные данные при создании пользователя');
+        res.status(400).send({ message: 'Переданы некорректные данные при создании пользователя' });
         return;
       }
       if (error.name === 'CastError') {
-        res.status(400).send('Неверный формат id пользователя');
+        res.status(400).send({ message: 'Неверный формат id пользователя' });
         return;
       }
-      res.status(500).send('Ошибка на сервере');
+      res.status(500).send({ message: 'Ошибка на сервере' });
     });
 };
 
@@ -95,23 +95,23 @@ const updateUserAvatar = (req, res) => {
       if (user) {
         res.send(user);
       } else {
-        res.status(404).send('Пользователь с указанным id не найден');
+        res.status(404).send({ message: 'Пользователь с указанным id не найден' });
       }
     })
     .catch((error) => {
       if (error.name === 'DocumentNotFoundError') {
-        res.status(404).send('Пользователь с указанным id не найден');
+        res.status(404).send({ message: 'Пользователь с указанным id не найден' });
         return;
       }
       if (error.name === 'ValidationError') {
-        res.status(400).send('Переданы некорректные данные при создании пользователя');
+        res.status(400).send({ message: 'Переданы некорректные данные при создании пользователя' });
         return;
       }
       if (error.name === 'CastError') {
-        res.status(400).send('Неверный формат id пользователя');
+        res.status(400).send({ message: 'Неверный формат id пользователя' });
         return;
       }
-      res.status(500).send('Ошибка на сервере');
+      res.status(500).send({ message: 'Ошибка на сервере' });
     });
 };
 
