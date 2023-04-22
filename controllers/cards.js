@@ -1,4 +1,5 @@
 const Card = require('../models/card');
+const { serverError, badRequestError, notFoundError } = require('../errors/errorsConstants');
 
 const createCard = (req, res) => {
   const { _id } = req.user;
@@ -9,45 +10,52 @@ const createCard = (req, res) => {
     owner: _id,
   })
     .then((newCard) => {
-      res.send(newCard);
+      res.status(201).send(newCard);
     })
     .catch((error) => {
       if (error.name === 'ValidationError') {
-        res.status(400).send({ message: 'Переданы некорректные данные при создании карточки' });
+        res.status(badRequestError).send({ message: 'Переданы некорректные данные при создании карточки' });
         return;
       }
-      res.status(500).send({ message: 'Ошибка на сервере' });
+      res.status(serverError).send({ message: 'Ошибка на сервере' });
     });
 };
 
 const getAllCards = (req, res) => {
   Card.find({})
+    .populate(['owner', 'likes'])
     .then((data) => {
       res.send(data);
     })
     .catch(() => {
-      res.status(500).send({ message: 'Ошибка на сервере' });
+      res.status(serverError).send({ message: 'Ошибка на сервере' });
     });
 };
 
 const deleteCard = (req, res) => {
   const { cardId } = req.params;
   Card.findByIdAndRemove(cardId)
+    .populate(['owner', 'likes'])
+    .orFail(() => {
+      const error = new Error('Карточка с указанным id не найдена');
+      error.name = 'DocumentNotFoundError';
+      throw error;
+    })
     .then((card) => {
       if (card) {
         res.send(card);
-      } else { res.status(404).send({ message: 'Карточка с указанным id не найдена' }); }
+      } else { res.status(notFoundError).send({ message: 'Карточка с указанным id не найдена' }); }
     })
     .catch((error) => {
       if (error.name === 'DocumentNotFoundError') {
-        res.status(404).send({ message: 'Карточка с указанным id не найдена' });
+        res.status(notFoundError).send({ message: 'Карточка с указанным id не найдена' });
         return;
       }
       if (error.name === 'CastError') {
-        res.status(400).send({ message: 'Неверный формат id карточки' });
+        res.status(badRequestError).send({ message: 'Неверный формат id карточки' });
         return;
       }
-      res.status(500).send({ message: 'Ошибка на сервере' });
+      res.status(serverError).send({ message: 'Ошибка на сервере' });
     });
 };
 
@@ -58,21 +66,27 @@ const putLikeToCard = (req, res) => {
     { $addToSet: { likes: req.user._id } },
     { new: true },
   )
+    .populate(['owner', 'likes'])
+    .orFail(() => {
+      const error = new Error('Карточка с указанным id не найдена');
+      error.name = 'DocumentNotFoundError';
+      throw error;
+    })
     .then((card) => {
       if (card) {
         res.status(200).send(card);
-      } else { res.status(404).send({ message: 'Карточка с указанным id не найдена' }); }
+      } else { res.status(notFoundError).send({ message: 'Карточка с указанным id не найдена' }); }
     })
     .catch((error) => {
       if (error.name === 'DocumentNotFoundError') {
-        res.status(404).send({ message: 'Карточка с указанным id не найдена' });
+        res.status(notFoundError).send({ message: 'Карточка с указанным id не найдена' });
         return;
       }
       if (error.name === 'CastError') {
-        res.status(400).send({ message: 'Неверный формат id карточки' });
+        res.status(badRequestError).send({ message: 'Неверный формат id карточки' });
         return;
       }
-      res.status(500).send({ message: 'Ошибка на сервере' });
+      res.status(serverError).send({ message: 'Ошибка на сервере' });
     });
 };
 
@@ -83,21 +97,27 @@ const deleteLikeFromCard = (req, res) => {
     { $pull: { likes: req.user._id } },
     { new: true },
   )
+    .populate(['owner', 'likes'])
+    .orFail(() => {
+      const error = new Error('Карточка с указанным id не найдена');
+      error.name = 'DocumentNotFoundError';
+      throw error;
+    })
     .then((card) => {
       if (card) {
         res.status(200).send(card);
-      } else { res.status(404).send({ message: 'Карточка с указанным id не найдена' }); }
+      } else { res.status(notFoundError).send({ message: 'Карточка с указанным id не найдена' }); }
     })
     .catch((error) => {
       if (error.name === 'DocumentNotFoundError') {
-        res.status(404).send({ message: 'Карточка с указанным id не найдена' });
+        res.status(notFoundError).send({ message: 'Карточка с указанным id не найдена' });
         return;
       }
       if (error.name === 'CastError') {
-        res.status(400).send({ message: 'Неверный формат id карточки' });
+        res.status(badRequestError).send({ message: 'Неверный формат id карточки' });
         return;
       }
-      res.status(500).send({ message: 'Ошибка на сервере' });
+      res.status(serverError).send({ message: 'Ошибка на сервере' });
     });
 };
 

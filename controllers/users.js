@@ -1,18 +1,17 @@
 const User = require('../models/user');
+const { serverError, badRequestError, notFoundError } = require('../errors/errorsConstants');
 
 const createUser = (req, res) => {
   const { name, about, avatar } = req.body;
   User.create({ name, about, avatar })
     .then((newUser) => {
-      if (newUser) { res.status(200).send(newUser); } else {
-        res.status(400).send({ message: 'Переданы некорректные данные при создании пользователя' });
-      }
+      res.status(201).send(newUser);
     })
     .catch((error) => {
       if (error.name === 'ValidationError') {
-        res.status(400).send({ message: 'Переданы некорректные данные при создании пользователя' });
+        res.status(badRequestError).send({ message: 'Переданы некорректные данные при создании пользователя' });
       } else {
-        res.status(500).send({ message: 'Ошибка на сервере' });
+        res.status(serverError).send({ message: 'Ошибка на сервере' });
       }
     });
 };
@@ -23,7 +22,7 @@ const getAllUsers = (req, res) => {
       res.send(data);
     })
     .catch(() => {
-      res.status(500).send({ message: 'Ошибка на сервере' });
+      res.status(serverError).send({ message: 'Ошибка на сервере' });
     });
 };
 
@@ -37,19 +36,19 @@ const getUser = (req, res) => {
     })
     .then((user) => {
       if (user) { res.status(200).send(user); } else {
-        res.status(404).send({ message: 'Пользователь с указанным id не найден' });
+        res.status(notFoundError).send({ message: 'Пользователь с указанным id не найден' });
       }
     })
     .catch((error) => {
       if (error.name === 'DocumentNotFoundError') {
-        res.status(404).send({ message: 'Пользователь с указанным id не найден' });
+        res.status(notFoundError).send({ message: 'Пользователь с указанным id не найден' });
         return;
       }
       if (error.name === 'CastError') {
-        res.status(400).send({ message: 'Неверный формат id пользователя' });
+        res.status(badRequestError).send({ message: 'Неверный формат id пользователя' });
         return;
       }
-      res.status(500).send({ message: 'Ошибка на сервере' });
+      res.status(serverError).send({ message: 'Ошибка на сервере' });
     });
 };
 
@@ -60,27 +59,28 @@ const updateUser = (req, res) => {
     { name, about },
     { new: true, runValidators: true },
   )
+    .orFail(() => {
+      const error = new Error('Пользователь с указанным id не найден');
+      error.name = 'DocumentNotFoundError';
+      throw error;
+    })
     .then((user) => {
       if (user) {
         res.send(user);
       } else {
-        res.status(404).send({ message: 'Пользователь с указанным id не найден' });
+        res.status(notFoundError).send({ message: 'Пользователь с указанным id не найден' });
       }
     })
     .catch((error) => {
       if (error.name === 'DocumentNotFoundError') {
-        res.status(404).send({ message: 'Пользователь с указанным id не найден' });
+        res.status(notFoundError).send({ message: 'Пользователь с указанным id не найден' });
         return;
       }
       if (error.name === 'ValidationError') {
-        res.status(400).send({ message: 'Переданы некорректные данные при создании пользователя' });
+        res.status(badRequestError).send({ message: 'Переданы некорректные данные при создании пользователя' });
         return;
       }
-      if (error.name === 'CastError') {
-        res.status(400).send({ message: 'Неверный формат id пользователя' });
-        return;
-      }
-      res.status(500).send({ message: 'Ошибка на сервере' });
+      res.status(serverError).send({ message: 'Ошибка на сервере' });
     });
 };
 
@@ -91,27 +91,28 @@ const updateUserAvatar = (req, res) => {
     { avatar },
     { new: true, runValidators: true },
   )
+    .orFail(() => {
+      const error = new Error('Пользователь с указанным id не найден');
+      error.name = 'DocumentNotFoundError';
+      throw error;
+    })
     .then((user) => {
       if (user) {
         res.send(user);
       } else {
-        res.status(404).send({ message: 'Пользователь с указанным id не найден' });
+        res.status(notFoundError).send({ message: 'Пользователь с указанным id не найден' });
       }
     })
     .catch((error) => {
       if (error.name === 'DocumentNotFoundError') {
-        res.status(404).send({ message: 'Пользователь с указанным id не найден' });
+        res.status(notFoundError).send({ message: 'Пользователь с указанным id не найден' });
         return;
       }
       if (error.name === 'ValidationError') {
-        res.status(400).send({ message: 'Переданы некорректные данные при создании пользователя' });
+        res.status(badRequestError).send({ message: 'Переданы некорректные данные при создании пользователя' });
         return;
       }
-      if (error.name === 'CastError') {
-        res.status(400).send({ message: 'Неверный формат id пользователя' });
-        return;
-      }
-      res.status(500).send({ message: 'Ошибка на сервере' });
+      res.status(serverError).send({ message: 'Ошибка на сервере' });
     });
 };
 
