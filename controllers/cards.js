@@ -33,16 +33,16 @@ const getAllCards = (req, res, next) => {
 const deleteCard = (req, res, next) => {
   const { cardId } = req.params;
   Card.findById(cardId)
+    .orFail(() => {
+      const error = new Error('Карточка с указанным id не найдена');
+      error.name = 'DocumentNotFoundError';
+      throw error;
+    })
     .then((card) => {
       const cardOwner = card.owner.toString().replace('new ObjectId("', '');
       if (req.user._id === cardOwner) {
         Card.findByIdAndRemove(cardId)
           .populate(['owner', 'likes'])
-          .orFail(() => {
-            const error = new Error('Карточка с указанным id не найдена');
-            error.name = 'DocumentNotFoundError';
-            throw error;
-          })
           .then((cardToDelete) => {
             res.status(200).send(cardToDelete);
           })
@@ -56,7 +56,8 @@ const deleteCard = (req, res, next) => {
       } else {
         next(new ForbiddenError('Нет прав на удаление выбранной карточки'));
       }
-    });
+    })
+    .catch(next);
 };
 
 const putLikeToCard = (req, res, next) => {
