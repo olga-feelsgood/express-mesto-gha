@@ -47,9 +47,10 @@ const deleteCard = (req, res, next) => {
             res.status(200).send(cardToDelete);
           })
           .catch((error) => {
-            if (error.name === 'DocumentNotFoundError') {
-              next(new NotFoundError('Карточка с указанным id не найдена'));
-            } else if (error.name === 'CastError') {
+            // if (error.name === 'DocumentNotFoundError') {
+            //   next(new NotFoundError('Карточка с указанным id не найдена'));
+            // }
+            if (error.name === 'CastError') {
               next(new BadRequestError('Неверный формат id карточки'));
             } else { next(error); }
           });
@@ -57,7 +58,11 @@ const deleteCard = (req, res, next) => {
         next(new ForbiddenError('Нет прав на удаление выбранной карточки'));
       }
     })
-    .catch(next);
+    .catch((error) => {
+      if (error.name === 'DocumentNotFoundError') {
+        next(new NotFoundError('Карточка с указанным id не найдена'));
+      } else { next(error); }
+    });
 };
 
 const putLikeToCard = (req, res, next) => {
