@@ -5,6 +5,7 @@ const User = require('../models/user');
 const NotFoundError = require('../errors/NotFoundError');
 const BadRequestError = require('../errors/BadRequestError');
 const UnauthorisedError = require('../errors/UnauthorisedError');
+const ConflictingRequest = require('../errors/ConflictingRequestError');
 
 const SALT_ROUNDS = 10;
 
@@ -33,7 +34,7 @@ const createUser = (req, res, next) => {
     })
     .catch((error) => {
       if (error.code === 11000) {
-        next(new BadRequestError('Пользователь с указанным email уже зарегистрирован'));
+        next(new ConflictingRequest('Пользователь с указанным email уже зарегистрирован'));
       } else if (error.name === 'ValidationError') {
         next(BadRequestError('Переданы некорректные данные при создании пользователя'));
       } else { next(error); }
