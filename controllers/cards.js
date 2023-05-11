@@ -34,9 +34,7 @@ const deleteCard = (req, res, next) => {
   const { cardId } = req.params;
   Card.findById(cardId)
     .orFail(() => {
-      const error = new Error('Карточка с указанным id не найдена');
-      error.name = 'DocumentNotFoundError';
-      throw error;
+      next(new NotFoundError('Карточка с указанным id не найдена'));
     })
     .then((card) => {
       const cardOwner = card.owner.toString().replace('new ObjectId("', '');
@@ -47,12 +45,7 @@ const deleteCard = (req, res, next) => {
             res.status(200).send(cardToDelete);
           })
           .catch((error) => {
-            // if (error.name === 'DocumentNotFoundError') {
-            //   next(new NotFoundError('Карточка с указанным id не найдена'));
-            // }
-            if (error.name === 'CastError') {
-              next(new BadRequestError('Неверный формат id карточки'));
-            } else { next(error); }
+            next(error);
           });
       } else {
         next(new ForbiddenError('Нет прав на удаление выбранной карточки'));
@@ -61,6 +54,8 @@ const deleteCard = (req, res, next) => {
     .catch((error) => {
       if (error.name === 'DocumentNotFoundError') {
         next(new NotFoundError('Карточка с указанным id не найдена'));
+      } else if (error.name === 'CastError') {
+        next(new BadRequestError('Неверный формат id карточки'));
       } else { next(error); }
     });
 };
@@ -74,9 +69,7 @@ const putLikeToCard = (req, res, next) => {
   )
     .populate(['owner', 'likes'])
     .orFail(() => {
-      const error = new Error('Карточка с указанным id не найдена');
-      error.name = 'DocumentNotFoundError';
-      throw error;
+      next(new NotFoundError('Карточка с указанным id не найдена'));
     })
     .then((card) => {
       res.status(200).send(card);
@@ -99,9 +92,7 @@ const deleteLikeFromCard = (req, res, next) => {
   )
     .populate(['owner', 'likes'])
     .orFail(() => {
-      const error = new Error('Карточка с указанным id не найдена');
-      error.name = 'DocumentNotFoundError';
-      throw error;
+      next(new NotFoundError('Карточка с указанным id не найдена'));
     })
     .then((card) => {
       res.status(200).send(card);

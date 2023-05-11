@@ -4,7 +4,6 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 const NotFoundError = require('../errors/NotFoundError');
 const BadRequestError = require('../errors/BadRequestError');
-const UnauthorisedError = require('../errors/UnauthorisedError');
 const ConflictingRequest = require('../errors/ConflictingRequestError');
 
 const SALT_ROUNDS = 10;
@@ -13,7 +12,6 @@ const createUser = (req, res, next) => {
   const {
     name, about, avatar, email, password,
   } = req.body;
-  if (!email || !password) { next(new BadRequestError('Email или пароль не могут быть пустыми')); }
   // хешируем пароль
   bcrypt.hash(password, SALT_ROUNDS)
     .then((hash) => User.create({
@@ -53,9 +51,7 @@ const getUser = (req, res, next) => {
   const { userId } = req.params;
   User.findById(userId)
     .orFail(() => {
-      const error = new Error('Пользователь с указанным id не найден');
-      error.name = 'DocumentNotFoundError';
-      throw error;
+      next(new NotFoundError('Пользователь с указанным id не найден'));
     })
     .then((user) => {
       res.status(200).send(user);
@@ -77,9 +73,7 @@ const updateUser = (req, res, next) => {
     { new: true, runValidators: true },
   )
     .orFail(() => {
-      const error = new Error('Пользователь с указанным id не найден');
-      error.name = 'DocumentNotFoundError';
-      throw error;
+      next(new NotFoundError('Пользователь с указанным id не найден'));
     })
     .then((user) => {
       res.status(200).send(user);
@@ -101,9 +95,7 @@ const updateUserAvatar = (req, res, next) => {
     { new: true, runValidators: true },
   )
     .orFail(() => {
-      const error = new Error('Пользователь с указанным id не найден');
-      error.name = 'DocumentNotFoundError';
-      throw error;
+      next(new NotFoundError('Пользователь с указанным id не найден'));
     })
     .then((user) => {
       res.status(200).send(user);
@@ -120,8 +112,6 @@ const updateUserAvatar = (req, res, next) => {
 const login = (req, res, next) => {
   const { email, password } = req.body;
 
-  if (!email || !password) { next(new BadRequestError('Email или пароль не могут быть пустыми')); }
-
   return User.findUserByCredentials(email, password)
     .then((user) => {
       // создадим токен
@@ -129,23 +119,20 @@ const login = (req, res, next) => {
       // вернём токен
       res.send({ token });
     })
-    .catch(() => {
-      next(new UnauthorisedError('Почта или пароль введены неправильно'));
-    });
+    .catch(next);
 };
 
 const getCurrentUser = (req, res, next) => {
   const userId = req.user._id;
 
   User.findOne({ _id: userId })
+    .orFail(() => {
+      next(new NotFoundError('Пользователь с указанным id не найден'));
+    })
     .then((user) => {
       res.status(200).send(user);
     })
-    .catch((error) => {
-      if (error.name === 'CastError') {
-        next(new BadRequestError('Неверный формат id пользователя'));
-      } else { next(error); }
-    });
+    .catch(next);
 };
 
 module.exports = {
