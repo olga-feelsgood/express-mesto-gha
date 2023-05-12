@@ -52,9 +52,7 @@ const deleteCard = (req, res, next) => {
       }
     })
     .catch((error) => {
-      if (error.name === 'DocumentNotFoundError') {
-        next(new NotFoundError('Карточка с указанным id не найдена'));
-      } else if (error.name === 'CastError') {
+      if (error.name === 'CastError') {
         next(new BadRequestError('Неверный формат id карточки'));
       } else { next(error); }
     });
@@ -75,9 +73,7 @@ const putLikeToCard = (req, res, next) => {
       res.status(200).send(card);
     })
     .catch((error) => {
-      if (error.name === 'DocumentNotFoundError') {
-        next(new NotFoundError('Карточка с указанным id не найдена'));
-      } else if (error.name === 'CastError') {
+      if (error.name === 'CastError') {
         next(new BadRequestError('Неверный формат id карточки'));
       } else { next(error); }
     });
@@ -98,9 +94,7 @@ const deleteLikeFromCard = (req, res, next) => {
       res.status(200).send(card);
     })
     .catch((error) => {
-      if (error.name === 'DocumentNotFoundError') {
-        next(new NotFoundError('Карточка с указанным id не найдена'));
-      } else if (error.name === 'CastError') {
+      if (error.name === 'CastError') {
         next(new BadRequestError('Неверный формат id карточки'));
       } else { next(error); }
     });

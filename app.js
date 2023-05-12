@@ -5,6 +5,7 @@ const router = require('./routes');
 const NotFoundError = require('./errors/NotFoundError');
 const { login, createUser } = require('./controllers/users');
 const auth = require('./middlewares/auth');
+const { requestLogger, errorLogger } = require('./middlewares/logger');
 
 const app = express();
 
@@ -12,6 +13,8 @@ mongoose.connect('mongodb://localhost:27017/mestodb');
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+app.use(requestLogger);
 
 app.post('/signin', celebrate({
   body: Joi.object().keys({
@@ -37,6 +40,8 @@ app.use(router);
 app.use('/', (req, res, next) => {
   next(new NotFoundError('Ошибка 404. Запрашиваемые вами данные не найдены.'));
 });
+
+app.use(errorLogger);
 
 app.use(errors());
 

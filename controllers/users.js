@@ -57,9 +57,7 @@ const getUser = (req, res, next) => {
       res.status(200).send(user);
     })
     .catch((error) => {
-      if (error.name === 'DocumentNotFoundError') {
-        next(new NotFoundError('Пользователь с указанным id не найден'));
-      } else if (error.name === 'CastError') {
+      if (error.name === 'CastError') {
         next(new BadRequestError('Неверный формат id пользователя'));
       } else { next(error); }
     });
@@ -79,9 +77,7 @@ const updateUser = (req, res, next) => {
       res.status(200).send(user);
     })
     .catch((error) => {
-      if (error.name === 'DocumentNotFoundError') {
-        next(new NotFoundError('Пользователь с указанным id не найден'));
-      } else if (error.name === 'ValidationError') {
+      if (error.name === 'ValidationError') {
         next(new BadRequestError('Переданы некорректные данные при создании пользователя'));
       } else { next(error); }
     });
@@ -101,9 +97,7 @@ const updateUserAvatar = (req, res, next) => {
       res.status(200).send(user);
     })
     .catch((error) => {
-      if (error.name === 'DocumentNotFoundError') {
-        next(new NotFoundError('Пользователь с указанным id не найден'));
-      } else if (error.name === 'ValidationError') {
+      if (error.name === 'ValidationError') {
         next(new BadRequestError('Переданы некорректные данные при создании пользователя'));
       } else { next(error); }
     });
